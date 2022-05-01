@@ -1,8 +1,5 @@
-// Configs
 import SQLite from '../../configs/sqlite.config';
 import mockApi from '../../mocks/api.mock';
-
-// Controllers
 import userController from './user.controller';
 
 let req: any;
