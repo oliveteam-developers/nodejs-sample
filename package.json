@@ -13,7 +13,10 @@
     "watch-ts": "tsc -w",
     "migration:generate": "typeorm migration:create -n",
     "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run",
-    "migration:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert"
+    "migration:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose restart"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
