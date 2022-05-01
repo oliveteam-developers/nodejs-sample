@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-yarn install && yarn build && pm2-runtime start dist/index.js
+yarn install && yarn build && cd dist && pm2-runtime start index.js
