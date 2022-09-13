@@ -14,7 +14,19 @@
     "paths": {
       "*": [
         "node_modules/*",
-        "src/interfaces/*"
+        "interfaces/*"
+      ],
+      "@app/*": [
+        "src/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@configs/*": [
+        "src/configs/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
       ]
     },
     "lib": [

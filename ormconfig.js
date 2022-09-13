@@ -1,5 +1,5 @@
 require('dotenv/config');
-
+// console.log('process.env', process.env)
 module.exports = {
   type: 'mysql',
   host: process.env.DB_HOST || '127.0.0.1',
@@ -12,9 +12,9 @@ module.exports = {
   synchronize: false,
   entities: process.env.NODE_ENV !== 'production' ? ['**/**.entity.ts'] : ['dist/**/*.entity.js'],
   logging: process.env.NODE_ENV !== 'production' ? 'all' : 'error',
-  migrations: ['src/migrations/*.ts'],
+  migrations: ['src/database/migrations/*.ts'],
   cli: {
-    migrationsDir: 'src/migrations'
+    migrationsDir: 'src/database/migrations'
   },
   connectTimeout: 30000,
   acquireTimeout: 30000

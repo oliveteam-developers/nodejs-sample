@@ -3,7 +3,7 @@ require('dotenv').config();
 import 'reflect-metadata';
 import { createConnection } from 'typeorm';
 import logger from './configs/logger.config';
-import app from './configs/express.config';
+import app from '@configs/app.config';
 
 const PORT = process.env.PORT || 5000;
 

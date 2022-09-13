@@ -1,6 +1,6 @@
 import request, { CallbackHandler } from 'supertest';
 import routes from './default.route';
-import app from '../../configs/express.config';
+import app from '@app/configs/express.config';
 
 describe('Testing default router', () => {
   test('Get default', (done: CallbackHandler) => {

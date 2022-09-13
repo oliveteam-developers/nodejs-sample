@@ -5,3 +5,4 @@ migration/
 dist/
 coverage/*
 .env
+data

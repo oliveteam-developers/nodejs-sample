@@ -1,63 +1,120 @@
-version: '3'
-
+version: "3.7"
 services:
-  mysql:
-    build:
-      context: .
-      dockerfile: ./docker/services/mysql/Dockerfile
-    restart: always
-    container_name: ${DOCKER_APP_NAME}_mysql
-    networks:
-      - net
-    expose:
-      - ${DOCKER_MYSQL_PORT}
-    ports:
-      - "${DOCKER_MYSQL_PORTS}"
-    volumes:
-      - dbdata:/var/lib/mysql/
-    environment:
-      - MYSQL_DATABASE=${DOCKER_MYSQL_DB_NAME}
-      - MYSQL_ROOT_PASSWORD=${DOCKER_MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${DOCKER_MYSQL_PASSWORD}
-      - MYSQL_TCP_PORT=${DOCKER_MYSQL_PORT}
-      - MYSQL_ROOT_HOST=%
-    command: [
-      '--character-set-server=utf8mb4',
-      '--collation-server=utf8mb4_unicode_ci',
-      '--default-authentication-plugin=mysql_native_password'
-    ]
-  node:
+  # app:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #   container_name: ${APP_NAME}-dev
+  #   restart: unless-stopped
+  #   working_dir: /var/www
+  #   volumes:
+  #     - ./:/var/www
+  #   networks:
+  #     - ${APP_NAME}-network
+  app:
     restart: on-failure
     depends_on:
       - mysql
     build:
       context: .
-      dockerfile: ./docker/services/node/Dockerfile
-    container_name: ${DOCKER_APP_NAME}_node
-    working_dir: ${DOCKER_APP_PATH}
+      dockerfile: ./docker/node/Dockerfile
+    container_name: ${APP_NAME}-dev
+    working_dir: /var/www
     networks:
-      - net
+      - ${APP_NAME}-network
     ports:
-      - "${DOCKER_NODE_PORTS}"
+      - ${FORWARD_APP_PORT}:5000
     entrypoint: sh /bin/node/command.sh
     volumes:
-      - .:${DOCKER_APP_PATH}
-      - ${DOCKER_APP_PATH}/node_modules
-      - ./docker/services/node/command-${NODE_ENV}.sh:/bin/node/command.sh
+      - .:/var/www
+      - /var/www/node_modules
+      - ./docker/node/command-${APP_ENV}.sh:/bin/node/command.sh
     environment:
-      - DB_HOST=${DOCKER_APP_NAME}_mysql
-      - DB_USER=${DOCKER_MYSQL_USER}
-      - DB_PASSWORD=${DOCKER_MYSQL_PASSWORD}
-      - DB_NAME=${DOCKER_MYSQL_DB_NAME}
-      - DB_PORT=${DOCKER_MYSQL_PORT}
-      - NODE_ENV=${NODE_ENV}
-      - PORT=${PORT}
-      - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+    #   - DB_HOST=${DOCKER_APP_NAME}_mysql
+    #   - DB_USER=${DOCKER_MYSQL_USER}
+    #   - DB_PASSWORD=${DOCKER_MYSQL_PASSWORD}
+    #   - DB_NAME=${DOCKER_MYSQL_DB_NAME}
+    #   - DB_PORT=${DOCKER_MYSQL_PORT}
+      - NODE_ENV=${APP_ENV}
+    #   - PORT=${PORT}
+    #   - TOKEN_SECRET_KEY=${TOKEN_SECRET_KEY}
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: ${APP_NAME}-dev-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - ${FORWARD_APP_PORT}:80
+  #     # - 443:443
+  #   volumes:
+  #     - ./:/var/www
+  #     - ./docker/nginx/${APP_ENV:-local}:/etc/nginx/conf.d/
+  #     - ./data/certbot/conf:/etc/letsencrypt
+  #     # - ./data/certbot/www:/var/www/public/certbot
+  #   networks:
+  #     - ${APP_NAME}-network
+## Mysql ###########################################
+  mysql:
+    image: 'mysql:8'
+    container_name: ${APP_NAME}-dev-mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+        - '${FORWARD_DB_PORT:-3306}:3306'
+    environment:
+        MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+        MYSQL_DATABASE: '${DB_NAME}'
+        MYSQL_USER: '${DB_USER}'
+        MYSQL_PASSWORD: '${DB_PASSWORD}'
+        MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+        - '${DATA_PATH_HOST}/mysql:/var/lib/mysql'
+    networks:
+        - ${APP_NAME}-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      retries: 3
+      timeout: 5s
 
+# ### PostgreSQL ###########################################
+#   postgres:
+#     build: ./docker/postgres
+#     container_name: borox-dev-postgres
+#     volumes:
+#       - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql
+#       - ./docker/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+#     ports:
+#       - "${DB_PORT:-5432}:5432"
+#     environment:
+#       - POSTGRES_DB=${DB_DATABASE}
+#       - POSTGRES_USER=${DB_USERNAME}
+#       - POSTGRES_PASSWORD=${DB_PASSWORD}
+#     networks:
+#       - travellist
+
+## Redis ################################################
+  redis:
+    build: ./docker/redis
+    container_name: ${APP_NAME}-dev-redis
+    volumes:
+      - ${DATA_PATH_HOST}/redis:/data
+    ports:
+      - "${FORWARD_REDIS_PORT}:6379"
+    networks:
+      - ${APP_NAME}-network
+
+  mongodb:
+    image: mongo
+    container_name: ${APP_NAME}-dev-mongodb
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ${DATA_PATH_HOST}/mongodb:/data/db
+    ports:
+      - "${MONGO_FORWARD_PORT:-27017}:27017"
+    restart: unless-stopped
+    networks:
+      - ${APP_NAME}-network
 networks:
-  net:
+  node-starter-network:
     driver: bridge
-
-volumes:
-  dbdata:
-    driver: local

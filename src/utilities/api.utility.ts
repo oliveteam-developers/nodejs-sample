@@ -1,11 +1,11 @@
 import { Request } from 'express';
 
 // Entities
-import { User } from '../entities/user/user.entity';
-import { BaseEntity } from '../entities/base/base.entity';
+import { User } from '@modules/user/entities/user.entity';
+import { BaseEntity } from '@app/core/entities/base.entity';
 
 // Interfaces
-import { IPagination } from '../interfaces/common.interface';
+import { IPagination } from '@app/core/interfaces/common.interface';
 
 export default class ApiUtility {
   static getCookieFromRequest(req: Request, key: string) {

@@ -21,7 +21,7 @@ export default class SQLite {
       name: 'default',
       type: 'better-sqlite3',
       database: ':memory:',
-      entities: ['src/entities/**/*.ts'],
+      entities: ['src/**/*.entity.ts'],
       synchronize: true,
     });
   }

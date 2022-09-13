@@ -2,7 +2,7 @@ import { Response } from 'express';
 import httpStatusCodes from 'http-status-codes';
 
 // Interfaces
-import { ICookie, IPagination, IOverrideRequest } from '../interfaces/common.interface';
+import { ICookie, IPagination, IOverrideRequest } from '@app/core/interfaces/common.interface';
 
 // Errors
 import { StringError } from '../errors/string.error';
